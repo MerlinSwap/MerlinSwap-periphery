@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.4;
 
-interface IiZiSwapPool {
+interface IMerlinSwapPool {
 
     /// @notice Emitted when miner successfully add liquidity (mint).
     /// @param sender the address that minted the liquidity
@@ -484,7 +484,7 @@ interface IiZiSwapPool {
     function expandObservationQueue(uint16 newNextQueueLen) external;
 
     /// @notice Borrow tokenX and/or tokenY and pay it back within a block.
-    /// @dev The caller needs to implement a IiZiSwapPool#flashCallback callback function
+    /// @dev The caller needs to implement a IMerlinSwapPool#flashCallback callback function
     /// @param recipient the address which will receive the tokenY and/or tokenX
     /// @param amountX the amount of tokenX to borrow
     /// @param amountY the amount of tokenY to borrow

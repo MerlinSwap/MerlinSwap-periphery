@@ -15,7 +15,7 @@ const weth = v[2];
 
 async function main() {
 
-    const factory = deployed[net].iZiSwapFactory;
+    const factory = deployed[net].MerlinSwapFactory;
     // deploy Quoter
     const Quoter = await ethers.getContractFactory("Quoter");
     const quoter = await Quoter.deploy(factory, weth);

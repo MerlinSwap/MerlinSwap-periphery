@@ -48,18 +48,18 @@ function stringLess(a, b) {
 }
 
 async function getPool(poolAddr, signer) {
-    const poolJson = getContractJson(__dirname + '/core/iZiSwapPool.json');
+    const poolJson = getContractJson(__dirname + '/core/MerlinSwapPool.json');
     const poolFactory = await ethers.getContractFactory(poolJson.abi, poolJson.bytecode, signer)
     const pool =  poolFactory.attach(poolAddr)
     return pool
 }
 
 async function getIzumiswapFactory(receiverAddr, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer) {
-    const iZiSwapJson = getContractJson(__dirname + '/core/iZiSwapFactory.json');
+    const MerlinSwapJson = getContractJson(__dirname + '/core/MerlinSwapFactory.json');
     
-    const iZiSwapFactory = await ethers.getContractFactory(iZiSwapJson.abi, iZiSwapJson.bytecode, signer);
+    const MerlinSwapFactory = await ethers.getContractFactory(MerlinSwapJson.abi, MerlinSwapJson.bytecode, signer);
 
-    const factory = await iZiSwapFactory.deploy(receiverAddr, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, 50);
+    const factory = await MerlinSwapFactory.deploy(receiverAddr, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, 50);
     await factory.deployed();
 
     await factory.enableFeeAmount(3000, 50);
@@ -111,8 +111,8 @@ async function getPoolParts(signer) {
 
 
 async function getLimOrder(poolAddr, pt) {
-    const iZiSwapPool = await ethers.getContractFactory("iZiSwapPool");
-    pool = await iZiSwapPool.attach(poolAddr);
+    const MerlinSwapPool = await ethers.getContractFactory("MerlinSwapPool");
+    pool = await MerlinSwapPool.attach(poolAddr);
     const {sellingX, accEarnX, sellingY, accEarnY, earnX, earnY} = await pool.limitOrderData(pt);
     return {
         sellingX: BigNumber(sellingX._hex),

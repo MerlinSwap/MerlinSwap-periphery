@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../core/interfaces/IiZiSwapFactory.sol";
+import "../core/interfaces/IMerlinSwapFactory.sol";
 
 /// @title Interface for WETH9
 interface IWETH9 is IERC20 {
@@ -15,7 +15,7 @@ interface IWETH9 is IERC20 {
 }
 
 abstract contract Base {
-    /// @notice address of iZiSwapFactory
+    /// @notice address of MerlinSwapFactory
     address public immutable factory;
 
     /// @notice address of weth9 token
@@ -29,7 +29,7 @@ abstract contract Base {
     receive() external payable {}
 
     /// @notice Constructor of base.
-    /// @param _factory address of iZiSwapFactory
+    /// @param _factory address of MerlinSwapFactory
     /// @param _WETH9 address of weth9 token
     constructor(address _factory, address _WETH9) {
         factory = _factory;
@@ -183,7 +183,7 @@ abstract contract Base {
     /// @param tokenY tokenY of swap pool
     /// @param fee fee amount of swap pool
     function pool(address tokenX, address tokenY, uint24 fee) public view returns(address) {
-        return IiZiSwapFactory(factory).pool(tokenX, tokenY, fee);
+        return IMerlinSwapFactory(factory).pool(tokenX, tokenY, fee);
     }
     function verify(address tokenX, address tokenY, uint24 fee) internal view {
         require (msg.sender == pool(tokenX, tokenY, fee), "sp");

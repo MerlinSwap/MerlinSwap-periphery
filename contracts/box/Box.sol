@@ -58,7 +58,7 @@ contract Box is ReentrancyGuard {
         } else if (isWrapToken) {
             actualAmount = IWrapToken(token).depositFrom(msg.sender, address(this), amount);
         } else {
-            // no need to check, because iziswap core will revert unenough amount
+            // no need to check, because MerlinSwap core will revert unenough amount
             bool ok = IERC20(token).transferFrom(msg.sender, address(this), amount);
             require(ok, '[recvTokenFromUser]: erc20 transfer fail');
             actualAmount = amount;

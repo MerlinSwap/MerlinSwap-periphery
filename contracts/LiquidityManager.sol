@@ -5,16 +5,16 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "./core/interfaces/IiZiSwapCallback.sol";
-import "./core/interfaces/IiZiSwapFactory.sol";
-import "./core/interfaces/IiZiSwapPool.sol";
+import "./core/interfaces/IMerlinSwapCallback.sol";
+import "./core/interfaces/IMerlinSwapFactory.sol";
+import "./core/interfaces/IMerlinSwapPool.sol";
 
 import "./libraries/MintMath.sol";
 import "./libraries/TwoPower.sol";
 
 import "./base/base.sol";
 
-contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallback {
+contract LiquidityManager is Ownable, Base, ERC721Enumerable, IMerlinSwapMintCallback {
 
     /// @notice Emitted when miner successfully add liquidity on an existing liquidity-nft
     /// @param nftId id of minted liquidity nft
@@ -43,7 +43,7 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
         uint256 amountY
     );
 
-    // callback data passed through iZiSwapPool#mint to the callback
+    // callback data passed through MerlinSwapPool#mint to the callback
     struct MintCallbackData {
         // tokenX of swap
         address tokenX;
@@ -51,7 +51,7 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
         address tokenY;
         // fee amount of swap
         uint24 fee;
-        // address to pay tokenX and tokenY to iZiSwapPool
+        // address to pay tokenX and tokenY to MerlinSwapPool
         address payer;
     }
 
@@ -116,12 +116,12 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
     }
 
     /// @notice Constructor to create this contract.
-    /// @param factory address of iZiSwapFactory
+    /// @param factory address of MerlinSwapFactory
     /// @param weth address of WETH token
     constructor(
         address factory,
         address weth
-    ) ERC721("iZiSwap Liquidity NFT", "IZISWAP-LIQUIDITY-NFT") Base(factory, weth) {
+    ) ERC721("MerlinSwap Liquidity NFT", "MerlinSwap-LIQUIDITY-NFT") Base(factory, weth) {
     }
 
     /// @notice Callback for mining, in order to deposit tokens.
@@ -150,9 +150,9 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
     /// @return corresponding pool address
     function createPool(address tokenX, address tokenY, uint24 fee, int24 initialPoint) external returns (address) {
         require(tokenX < tokenY, "x<y");
-        address pool = IiZiSwapFactory(factory).pool(tokenX, tokenY, fee);
+        address pool = IMerlinSwapFactory(factory).pool(tokenX, tokenY, fee);
         if (pool == address(0)) {
-            pool = IiZiSwapFactory(factory).newPool(tokenX, tokenY, fee, initialPoint);
+            pool = IMerlinSwapFactory(factory).newPool(tokenX, tokenY, fee, initialPoint);
             return pool;
         }
         return pool;
@@ -172,7 +172,7 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
 
     function getLastFeeScale(address pool, bytes32 key) private view returns(uint256, uint256) {
 
-        (, uint256 lastFeeScaleX_128, uint256 lastFeeScaleY_128, , ) = IiZiSwapPool(pool).liquidity(
+        (, uint256 lastFeeScaleX_128, uint256 lastFeeScaleY_128, , ) = IMerlinSwapPool(pool).liquidity(
             key
         );
         return (lastFeeScaleX_128, lastFeeScaleY_128);
@@ -187,7 +187,7 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
             ,
             ,
             ,
-        ) = IiZiSwapPool(pool).state();
+        ) = IMerlinSwapPool(pool).state();
         return (sqrtPrice_96, currPt);
     }
 
@@ -222,8 +222,8 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
     ) {
         int24 currPt;
         uint160 sqrtPrice_96;
-        pool = IiZiSwapFactory(factory).pool(mp.tokenX, mp.tokenY, mp.fee);
-        uint160 sqrtRate_96 = IiZiSwapPool(pool).sqrtRate_96();
+        pool = IMerlinSwapFactory(factory).pool(mp.tokenX, mp.tokenY, mp.fee);
+        uint160 sqrtRate_96 = IMerlinSwapPool(pool).sqrtRate_96();
         require(pool != address(0), "P0");
         (sqrtPrice_96, currPt) = getPoolPrice(pool);
         liquidity = MintMath.computeLiquidity(
@@ -237,7 +237,7 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
             sqrtPrice_96,
             sqrtRate_96
         );
-        (amountX, amountY) = IiZiSwapPool(pool).mint(address(this), mp.pl, mp.pr, liquidity, 
+        (amountX, amountY) = IMerlinSwapPool(pool).mint(address(this), mp.pl, mp.pr, liquidity, 
             abi.encode(MintCallbackData({tokenX: mp.tokenX, tokenY: mp.tokenY, fee: mp.fee, payer: msg.sender})));
     }
 
@@ -343,8 +343,8 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
         PoolMeta memory poolMeta = poolMetas[liquid.poolId];
         int24 currPt;
         uint160 sqrtPrice_96;
-        address pool = IiZiSwapFactory(factory).pool(poolMeta.tokenX, poolMeta.tokenY, poolMeta.fee);
-        // uint160 sqrtRate_96 = IiZiSwapPool(pool).sqrtRate_96();
+        address pool = IMerlinSwapFactory(factory).pool(poolMeta.tokenX, poolMeta.tokenY, poolMeta.fee);
+        // uint160 sqrtRate_96 = IMerlinSwapPool(pool).sqrtRate_96();
         require(pool != address(0), "P0");
         (sqrtPrice_96, currPt) = getPoolPrice(pool);
         liquidityDelta = MintMath.computeLiquidity(
@@ -357,11 +357,11 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
             currPt,
             sqrtPrice_96,
             // sqrtRate_96
-            IiZiSwapPool(pool).sqrtRate_96()
+            IMerlinSwapPool(pool).sqrtRate_96()
         );
         require(int128(liquid.liquidity) == int256(uint256(liquid.liquidity)), "LO");
         uint128 newLiquidity = liquidityDelta + liquid.liquidity;
-        (amountX, amountY) = IiZiSwapPool(pool).mint(address(this), liquid.leftPt, liquid.rightPt, liquidityDelta, 
+        (amountX, amountY) = IMerlinSwapPool(pool).mint(address(this), liquid.leftPt, liquid.rightPt, liquidityDelta, 
             abi.encode(MintCallbackData({tokenX: poolMeta.tokenX, tokenY: poolMeta.tokenY, fee: poolMeta.fee, payer: msg.sender})));
         require(amountX >= addLiquidityParam.amountXMin, "XMIN");
         require(amountY >= addLiquidityParam.amountYMin, "YMIN");
@@ -397,11 +397,11 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
             liquidDelta = liquidity.liquidity;
         }
         PoolMeta memory poolMeta = poolMetas[liquidity.poolId];
-        address pool = IiZiSwapFactory(factory).pool(poolMeta.tokenX, poolMeta.tokenY, poolMeta.fee);
+        address pool = IMerlinSwapFactory(factory).pool(poolMeta.tokenX, poolMeta.tokenY, poolMeta.fee);
         require(pool != address(0), "P0");
         
         uint128 newLiquidity = liquidity.liquidity - liquidDelta;
-        (amountX, amountY) = IiZiSwapPool(pool).burn(liquidity.leftPt, liquidity.rightPt, liquidDelta);
+        (amountX, amountY) = IMerlinSwapPool(pool).burn(liquidity.leftPt, liquidity.rightPt, liquidDelta);
         require(amountX >= amountXMin, "XMIN");
         require(amountY >= amountYMin, "YMIN");
         updateLiquidity(liquidity, pool, newLiquidity, amountX, amountY);
@@ -430,10 +430,10 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
         require(lid < liquidityNum, "LN");
         Liquidity storage liquidity = liquidities[lid];
         PoolMeta memory poolMeta = poolMetas[liquidity.poolId];
-        address pool = IiZiSwapFactory(factory).pool(poolMeta.tokenX, poolMeta.tokenY, poolMeta.fee);
+        address pool = IMerlinSwapFactory(factory).pool(poolMeta.tokenX, poolMeta.tokenY, poolMeta.fee);
         require(pool != address(0), "P0");
         if (liquidity.liquidity > 0) {
-            IiZiSwapPool(pool).burn(liquidity.leftPt, liquidity.rightPt, 0);
+            IMerlinSwapPool(pool).burn(liquidity.leftPt, liquidity.rightPt, 0);
             updateLiquidity(liquidity, pool, liquidity.liquidity, 0, 0);
         }
         if (amountXLim > liquidity.remainTokenX) {
@@ -442,7 +442,7 @@ contract LiquidityManager is Ownable, Base, ERC721Enumerable, IiZiSwapMintCallba
         if (amountYLim > liquidity.remainTokenY) {
             amountYLim = uint128(liquidity.remainTokenY);
         }
-        (amountX, amountY) = IiZiSwapPool(pool).collect(recipient, liquidity.leftPt, liquidity.rightPt, amountXLim, amountYLim);
+        (amountX, amountY) = IMerlinSwapPool(pool).collect(recipient, liquidity.leftPt, liquidity.rightPt, amountXLim, amountYLim);
         // amountX(Y)Lim may be a little greater than actual value
         liquidity.remainTokenX -= amountXLim;
         liquidity.remainTokenY -= amountYLim;

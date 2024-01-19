@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.4;
 
-import "./core/interfaces/IiZiSwapCallback.sol";
-import "./core/interfaces/IiZiSwapFactory.sol";
-import "./core/interfaces/IiZiSwapPool.sol";
+import "./core/interfaces/IMerlinSwapCallback.sol";
+import "./core/interfaces/IMerlinSwapFactory.sol";
+import "./core/interfaces/IMerlinSwapPool.sol";
 
 import "./libraries/Path.sol";
 
 import "./base/base.sol";
 
-contract Swap is Base, IiZiSwapCallback {
+contract Swap is Base, IMerlinSwapCallback {
 
     uint256 private constant DEFAULT_PAYED_CACHED = type(uint256).max;
     uint256 private payedCached = DEFAULT_PAYED_CACHED;
@@ -22,7 +22,7 @@ contract Swap is Base, IiZiSwapCallback {
     }
 
     /// @notice constructor to create this contract
-    /// @param _factory address of iZiSwapFactory
+    /// @param _factory address of MerlinSwapFactory
     /// @param _weth address of weth token
     constructor(address _factory, address _weth) Base(_factory, _weth) {}
 
@@ -100,14 +100,14 @@ contract Swap is Base, IiZiSwapCallback {
             // tokenOut is tokenX, tokenIn is tokenY
             // we should call y2XDesireX
 
-            (acquire, ) = IiZiSwapPool(poolAddr).swapY2XDesireX(
+            (acquire, ) = IMerlinSwapPool(poolAddr).swapY2XDesireX(
                 recipient, uint128(desire), 800001,
                 abi.encode(data)
             );
         } else {
             // tokenOut is tokenY
             // tokenIn is tokenX
-            (, acquire) = IiZiSwapPool(poolAddr).swapX2YDesireY(
+            (, acquire) = IMerlinSwapPool(poolAddr).swapX2YDesireY(
                 recipient, uint128(desire), -800001,
                 abi.encode(data)
             );
@@ -133,7 +133,7 @@ contract Swap is Base, IiZiSwapCallback {
             if (tokenIn < tokenOut) {
                 // swapX2Y
                 uint256 costX;
-                (costX, acquire) = IiZiSwapPool(poolAddr).swapX2Y(
+                (costX, acquire) = IMerlinSwapPool(poolAddr).swapX2Y(
                     hasMultiplePools? address(this): recipient, amount, -799999,
                     abi.encode(SwapCallbackData({path: abi.encodePacked(tokenIn, fee, tokenOut), payer: payer}))
                 );
@@ -143,7 +143,7 @@ contract Swap is Base, IiZiSwapCallback {
             } else {
                 // swapY2X
                 uint256 costY;
-                (acquire, costY) = IiZiSwapPool(poolAddr).swapY2X(
+                (acquire, costY) = IMerlinSwapPool(poolAddr).swapY2X(
                     hasMultiplePools? address(this): recipient, amount, 799999,
                     abi.encode(SwapCallbackData({path: abi.encodePacked(tokenIn, fee, tokenOut), payer: payer}))
                 );
@@ -261,7 +261,7 @@ contract Swap is Base, IiZiSwapCallback {
         address poolAddr = pool(swapParams.tokenX, swapParams.tokenY, swapParams.fee);
         address payer = msg.sender;
         address recipient = (swapParams.recipient == address(0)) ? address(this): swapParams.recipient;
-        (uint256 amountX, ) = IiZiSwapPool(poolAddr).swapY2X(
+        (uint256 amountX, ) = IMerlinSwapPool(poolAddr).swapY2X(
             recipient, swapParams.amount, swapParams.boundaryPt,
             abi.encode(SwapCallbackData({path: abi.encodePacked(swapParams.tokenY, swapParams.fee, swapParams.tokenX), payer: payer}))
         );
@@ -278,7 +278,7 @@ contract Swap is Base, IiZiSwapCallback {
         address payer = msg.sender;
         address recipient = (swapParams.recipient == address(0)) ? address(this): swapParams.recipient;
         ExchangeAmount memory amount;
-        (amount.amountX, amount.amountY) = IiZiSwapPool(poolAddr).swapY2XDesireX(
+        (amount.amountX, amount.amountY) = IMerlinSwapPool(poolAddr).swapY2XDesireX(
             recipient, swapParams.amount, swapParams.boundaryPt,
             abi.encode(SwapCallbackData({path: abi.encodePacked(swapParams.tokenX, swapParams.fee, swapParams.tokenY), payer: payer}))
         );
@@ -297,7 +297,7 @@ contract Swap is Base, IiZiSwapCallback {
         address poolAddr = pool(swapParams.tokenX, swapParams.tokenY, swapParams.fee);
         address payer = msg.sender;
         address recipient = (swapParams.recipient == address(0)) ? address(this): swapParams.recipient;
-        (, uint256 amountY) = IiZiSwapPool(poolAddr).swapX2Y(
+        (, uint256 amountY) = IMerlinSwapPool(poolAddr).swapX2Y(
             recipient, swapParams.amount, swapParams.boundaryPt,
             abi.encode(SwapCallbackData({path: abi.encodePacked(swapParams.tokenX, swapParams.fee, swapParams.tokenY), payer: payer}))
         );
@@ -314,7 +314,7 @@ contract Swap is Base, IiZiSwapCallback {
         address payer = msg.sender;
         address recipient = (swapParams.recipient == address(0)) ? address(this): swapParams.recipient;
         ExchangeAmount memory amount;
-        (amount.amountX, amount.amountY) = IiZiSwapPool(poolAddr).swapX2YDesireY(
+        (amount.amountX, amount.amountY) = IMerlinSwapPool(poolAddr).swapX2YDesireY(
             recipient, swapParams.amount, swapParams.boundaryPt,
             abi.encode(SwapCallbackData({path: abi.encodePacked(swapParams.tokenY, swapParams.fee, swapParams.tokenX), payer: payer}))
         );

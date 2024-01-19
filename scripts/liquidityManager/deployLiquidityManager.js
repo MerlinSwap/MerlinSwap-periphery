@@ -16,8 +16,8 @@ const weth = v[2]
 async function main() {
     // deploy nft
     const LiquidityManager = await ethers.getContractFactory("LiquidityManager");
-    const iZiSwapFactory = deployed[net].iZiSwapFactory;
-    nflm = await LiquidityManager.deploy(iZiSwapFactory, weth);
+    const MerlinSwapFactory = deployed[net].MerlinSwapFactory;
+    nflm = await LiquidityManager.deploy(MerlinSwapFactory, weth);
     console.log("LiquidityManager: ", nflm.address);
     await nflm.deployed();
 }

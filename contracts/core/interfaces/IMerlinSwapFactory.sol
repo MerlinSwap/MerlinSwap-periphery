@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.4;
 
-interface IiZiSwapFactory {
+interface IMerlinSwapFactory {
 
-    /// @notice emit when successfuly create a new pool (calling iZiSwapFactory#newPool)
+    /// @notice emit when successfuly create a new pool (calling MerlinSwapFactory#newPool)
     /// @param tokenX address of erc-20 tokenX
     /// @param tokenY address of erc-20 tokenY
     /// @param fee fee amount of swap (3000 means 0.3%)

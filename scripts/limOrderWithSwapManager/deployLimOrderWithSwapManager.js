@@ -16,8 +16,8 @@ const weth = v[2]
 async function main() {
     // deploy nft
     const LimitOrderWithSwapManager = await ethers.getContractFactory("LimitOrderWithSwapManager");
-    const iZiSwapFactory = deployed[net].iZiSwapFactory;
-    const manager = await LimitOrderWithSwapManager.deploy(iZiSwapFactory, weth);
+    const MerlinSwapFactory = deployed[net].MerlinSwapFactory;
+    const manager = await LimitOrderWithSwapManager.deploy(MerlinSwapFactory, weth);
     console.log("LimitOrderWithSwapManager: ", manager.address);
     await manager.deployed();
 }

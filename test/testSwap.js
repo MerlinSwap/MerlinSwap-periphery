@@ -193,7 +193,7 @@ async function checkUserEarn(
 }
 
 async function getLimOrder(poolAddr, pt) {
-    const IzumiswapPool = await ethers.getContractFactory("iZiSwapPool");
+    const IzumiswapPool = await ethers.getContractFactory("MerlinSwapPool");
     pool = await IzumiswapPool.attach(poolAddr);
     [sellingX, accEarnX, sellingY, accEarnY, earnX, earnY] = await pool.limitOrderData(pt);
     return [
@@ -206,7 +206,7 @@ async function getLimOrder(poolAddr, pt) {
     ]
 }
 async function getStatusVal(poolAddr, pt) {
-    const IzumiswapPool = await ethers.getContractFactory("iZiSwapPool");
+    const IzumiswapPool = await ethers.getContractFactory("MerlinSwapPool");
     pool = await IzumiswapPool.attach(poolAddr);
     return await pool.statusVal(pt / 50);
 }

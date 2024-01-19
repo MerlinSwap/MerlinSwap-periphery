@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-interface IiZiSwapFlashCallback {
+interface IMerlinSwapFlashCallback {
 
-    /// @notice Call the msg.sender after sending tokens in IiZiSwapPool#flash.
+    /// @notice Call the msg.sender after sending tokens in IMerlinSwapPool#flash.
     /// @dev Must repay the tokens to the pool within one call.
     /// @param feeX the fee amount in tokenX due to the pool by the end of the flash
     /// @param feeY the fee amount in tokenY due to the pool by the end of the flash

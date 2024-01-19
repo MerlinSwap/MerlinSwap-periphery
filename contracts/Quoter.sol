@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.4;
 
-import "./core/interfaces/IiZiSwapCallback.sol";
-import "./core/interfaces/IiZiSwapFactory.sol";
-import "./core/interfaces/IiZiSwapPool.sol";
+import "./core/interfaces/IMerlinSwapCallback.sol";
+import "./core/interfaces/IMerlinSwapFactory.sol";
+import "./core/interfaces/IMerlinSwapPool.sol";
 
 import "./libraries/Path.sol";
 
 import "./base/base.sol";
 
-contract Quoter is Base, IiZiSwapCallback {
+contract Quoter is Base, IMerlinSwapCallback {
 
     using Path for bytes;
 
@@ -21,7 +21,7 @@ contract Quoter is Base, IiZiSwapCallback {
     uint256 private amountDesireCached;
 
     /// @notice Construct this contract.
-    /// @param _factory address iZiSwapFactory
+    /// @param _factory address MerlinSwapFactory
     /// @param _weth address of weth token
     constructor(address _factory, address _weth) Base(_factory, _weth) {}
 
@@ -81,7 +81,7 @@ contract Quoter is Base, IiZiSwapCallback {
             ,
             ,
             ,
-        ) = IiZiSwapPool(poolAddr).state();
+        ) = IMerlinSwapPool(poolAddr).state();
 
         if (token0 < token1) {
             // token1 is y, amount of token1 is calculated
@@ -126,7 +126,7 @@ contract Quoter is Base, IiZiSwapCallback {
             ,
             ,
             ,
-        ) = IiZiSwapPool(poolAddr).state();
+        ) = IMerlinSwapPool(poolAddr).state();
 
         if (token0 < token1) {
             // token0 is x, amount of token0 is input param
@@ -160,7 +160,7 @@ contract Quoter is Base, IiZiSwapCallback {
         if (tokenIn < tokenOut) {
             int24 boundaryPoint = -799999;
             try
-                IiZiSwapPool(poolAddr).swapX2Y(
+                IMerlinSwapPool(poolAddr).swapX2Y(
                     address(this), amount, boundaryPoint,
                     abi.encodePacked(tokenIn, fee, tokenOut)
                 )
@@ -170,7 +170,7 @@ contract Quoter is Base, IiZiSwapCallback {
         } else {
             int24 boundaryPoint = 799999;
             try
-                IiZiSwapPool(poolAddr).swapY2X(
+                IMerlinSwapPool(poolAddr).swapY2X(
                     address(this), amount, boundaryPoint,
                     abi.encodePacked(tokenIn, fee, tokenOut)
                 )
@@ -218,7 +218,7 @@ contract Quoter is Base, IiZiSwapCallback {
         if (tokenIn < tokenOut) {
             int24 boundaryPoint = -799999;
             try
-                IiZiSwapPool(poolAddr).swapX2YDesireY(
+                IMerlinSwapPool(poolAddr).swapX2YDesireY(
                     address(this), desire + 1, boundaryPoint,
                     abi.encodePacked(tokenOut, fee, tokenIn)
                 )
@@ -228,7 +228,7 @@ contract Quoter is Base, IiZiSwapCallback {
         } else {
             int24 boundaryPoint = 799999;
             try
-                IiZiSwapPool(poolAddr).swapY2XDesireX(
+                IMerlinSwapPool(poolAddr).swapY2XDesireX(
                     address(this), desire + 1, boundaryPoint,
                     abi.encodePacked(tokenOut, fee, tokenIn)
                 )
@@ -284,7 +284,7 @@ contract Quoter is Base, IiZiSwapCallback {
         require(tokenX < tokenY, "x<y");
         address poolAddr = pool(tokenX, tokenY, fee);
         try
-            IiZiSwapPool(poolAddr).swapY2X(
+            IMerlinSwapPool(poolAddr).swapY2X(
                 address(this), amount, highPt,
                 abi.encodePacked(tokenY, fee, tokenX)
             )
@@ -317,7 +317,7 @@ contract Quoter is Base, IiZiSwapCallback {
             amountDesireCached = desireX;
         }
         try
-            IiZiSwapPool(poolAddr).swapY2XDesireX(
+            IMerlinSwapPool(poolAddr).swapY2XDesireX(
                 address(this), desireX, highPt,
                 abi.encodePacked(tokenX, fee, tokenY)
             )
@@ -346,7 +346,7 @@ contract Quoter is Base, IiZiSwapCallback {
         require(tokenX < tokenY, "x<y");
         address poolAddr = pool(tokenX, tokenY, fee);
         try
-            IiZiSwapPool(poolAddr).swapX2Y(
+            IMerlinSwapPool(poolAddr).swapX2Y(
                 address(this), amount, lowPt,
                 abi.encodePacked(tokenX, fee, tokenY)
             )
@@ -379,7 +379,7 @@ contract Quoter is Base, IiZiSwapCallback {
             amountDesireCached = desireY;
         }
         try 
-            IiZiSwapPool(poolAddr).swapX2YDesireY(
+            IMerlinSwapPool(poolAddr).swapX2YDesireY(
                 address(this), desireY, lowPt,
                 abi.encodePacked(tokenY, fee, tokenX)
             )

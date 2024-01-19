@@ -3,9 +3,9 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "./core/interfaces/IiZiSwapCallback.sol";
-import "./core/interfaces/IiZiSwapFactory.sol";
-import "./core/interfaces/IiZiSwapPool.sol";
+import "./core/interfaces/IMerlinSwapCallback.sol";
+import "./core/interfaces/IMerlinSwapFactory.sol";
+import "./core/interfaces/IMerlinSwapPool.sol";
 
 import "./libraries/MulDivMath.sol";
 import "./libraries/TwoPower.sol";
@@ -15,7 +15,7 @@ import "./libraries/Converter.sol";
 import "./base/base.sol";
 import "./base/Switch.sol";
 
-contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback, IiZiSwapCallback {
+contract LimitOrderWithSwapManager is Switch, Base, IMerlinSwapAddLimOrderCallback, IMerlinSwapCallback {
 
     /// @notice Emitted when user preswap AND SWAP OUT or do market swap before adding limit order
     /// @param tokenIn address of tokenIn (user payed to swap pool)
@@ -90,7 +90,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
     // seller's active order id
     mapping(address => LimOrder[]) private addr2ActiveOrder;
 
-    // callback data passed through iZiSwapPool#addLimOrderWithX(Y) to the callback
+    // callback data passed through MerlinSwapPool#addLimOrderWithX(Y) to the callback
     struct LimCallbackData {
         // tokenX of swap pool
         address tokenX;
@@ -132,7 +132,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
     }
 
     /// @notice Constructor to create this contract.
-    /// @param factory address of iZiSwapFactory
+    /// @param factory address of MerlinSwapFactory
     /// @param weth address of WETH token
     constructor( address factory, address weth ) Base(factory, weth) {}
 
@@ -204,7 +204,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
     }
 
     function getEarnX(address pool, bytes32 key) private view returns(uint256, uint128, uint128) {
-        (uint256 lastAccEarn, , , uint128 earn, uint128 legacyEarn, ) = IiZiSwapPool(pool).userEarnX(key);
+        (uint256 lastAccEarn, , , uint128 earn, uint128 legacyEarn, ) = IMerlinSwapPool(pool).userEarnX(key);
         return (lastAccEarn, earn, legacyEarn);
     }
 
@@ -213,7 +213,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
     }
 
     function getEarnY(address pool, bytes32 key) private view returns(uint256, uint128, uint128) {
-        (uint256 lastAccEarn, , , uint128 earn, uint128 legacyEarn, ) = IiZiSwapPool(pool).userEarnY(key);
+        (uint256 lastAccEarn, , , uint128 earn, uint128 legacyEarn, ) = IMerlinSwapPool(pool).userEarnY(key);
         return (lastAccEarn, earn, legacyEarn);
     }
 
@@ -261,18 +261,18 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
         address pool, AddLimOrderParam memory addLimitOrderParam
     ) private returns (uint128 order, uint128 acquire) {
         if (addLimitOrderParam.sellXEarnY) {
-            (order, acquire) = IiZiSwapPool(pool).addLimOrderWithX(
+            (order, acquire) = IMerlinSwapPool(pool).addLimOrderWithX(
                 address(this), addLimitOrderParam.pt, addLimitOrderParam.amount,
                 abi.encode(LimCallbackData({tokenX: addLimitOrderParam.tokenX, tokenY: addLimitOrderParam.tokenY, fee: addLimitOrderParam.fee, payer: msg.sender}))
             );
         } else {
-            (order, acquire) = IiZiSwapPool(pool).addLimOrderWithY(
+            (order, acquire) = IMerlinSwapPool(pool).addLimOrderWithY(
                 address(this), addLimitOrderParam.pt, addLimitOrderParam.amount,
                 abi.encode(LimCallbackData({tokenX: addLimitOrderParam.tokenX, tokenY: addLimitOrderParam.tokenY, fee: addLimitOrderParam.fee, payer: msg.sender}))
             );
         }
         if (acquire > 0) {
-            IiZiSwapPool(pool).collectLimOrder(addLimitOrderParam.recipient, addLimitOrderParam.pt, 0, acquire, addLimitOrderParam.sellXEarnY);
+            IMerlinSwapPool(pool).collectLimOrder(addLimitOrderParam.recipient, addLimitOrderParam.pt, 0, acquire, addLimitOrderParam.sellXEarnY);
         }
     }
 
@@ -303,13 +303,13 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
             ,
             ,
             ,
-        ) = IiZiSwapPool(pool).state();
+        ) = IMerlinSwapPool(pool).state();
         if (addLimitOrderParam.sellXEarnY) {
             if (addLimitOrderParam.pt < currentPoint) {
                 uint256 costX;
                 uint256 acquireY;
                 if (addLimitOrderParam.isDesireMode) {
-                    (costX, acquireY) = IiZiSwapPool(pool).swapX2YDesireY(
+                    (costX, acquireY) = IMerlinSwapPool(pool).swapX2YDesireY(
                         recipient, addLimitOrderParam.amount, addLimitOrderParam.pt,
                         abi.encode(SwapCallbackData({
                             tokenX: addLimitOrderParam.tokenX, 
@@ -321,7 +321,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
                     require(acquireY >= addLimitOrderParam.swapMinAcquired, "X2YDesireYAcquired");
                     result.remainAmount = acquireY < uint256(addLimitOrderParam.amount) ? addLimitOrderParam.amount - uint128(acquireY) : 0;
                 } else {
-                    (costX, acquireY) = IiZiSwapPool(pool).swapX2Y(
+                    (costX, acquireY) = IMerlinSwapPool(pool).swapX2Y(
                         recipient, addLimitOrderParam.amount, addLimitOrderParam.pt,
                         abi.encode(SwapCallbackData({
                             tokenX: addLimitOrderParam.tokenX, 
@@ -341,7 +341,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
                 uint256 costY;
                 uint256 acquireX;
                 if (addLimitOrderParam.isDesireMode) {
-                    (acquireX, costY) = IiZiSwapPool(pool).swapY2XDesireX(
+                    (acquireX, costY) = IMerlinSwapPool(pool).swapY2XDesireX(
                         recipient, addLimitOrderParam.amount, addLimitOrderParam.pt + 1,
                         abi.encode(SwapCallbackData({
                             tokenX: addLimitOrderParam.tokenX, 
@@ -353,7 +353,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
                     require(acquireX >= addLimitOrderParam.swapMinAcquired, "Y2XDesireXAcquired");
                     result.remainAmount = acquireX < uint256(addLimitOrderParam.amount) ? addLimitOrderParam.amount - uint128(acquireX) : 0;
                 } else {
-                    (acquireX, costY) = IiZiSwapPool(pool).swapY2X(
+                    (acquireX, costY) = IMerlinSwapPool(pool).swapY2X(
                         recipient, addLimitOrderParam.amount, addLimitOrderParam.pt + 1,
                         abi.encode(SwapCallbackData({
                             tokenX: addLimitOrderParam.tokenX, 
@@ -390,7 +390,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
 
         addLimitOrderParam.recipient = addLimitOrderParam.recipient == address(0) ? address(this) : addLimitOrderParam.recipient;
         
-        address pool = IiZiSwapFactory(factory).pool(addLimitOrderParam.tokenX, addLimitOrderParam.tokenY, addLimitOrderParam.fee);
+        address pool = IMerlinSwapFactory(factory).pool(addLimitOrderParam.tokenX, addLimitOrderParam.tokenY, addLimitOrderParam.fee);
 
         SwapBeforeResult memory swapBeforeResult = _swapBefore(pool, addLimitOrderParam);
         addLimitOrderParam.amount = swapBeforeResult.remainAmount;
@@ -563,9 +563,9 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
         address pool, int24 pt, uint128 amount, bool isEarnY, bool fromLegacy
     ) private returns(uint128 actualAssign) {
         if (isEarnY) {
-            actualAssign = IiZiSwapPool(pool).assignLimOrderEarnY(pt, amount, fromLegacy);
+            actualAssign = IMerlinSwapPool(pool).assignLimOrderEarnY(pt, amount, fromLegacy);
         } else {
-            actualAssign = IiZiSwapPool(pool).assignLimOrderEarnX(pt, amount, fromLegacy);
+            actualAssign = IMerlinSwapPool(pool).assignLimOrderEarnX(pt, amount, fromLegacy);
         }
     }
 
@@ -579,9 +579,9 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
     ) private returns (uint128 earn) {
         uint256 legacyAccEarn;
         if (order.sellXEarnY) {
-            (, legacyAccEarn) = IiZiSwapPool(pool).decLimOrderWithX(order.pt, 0);
+            (, legacyAccEarn) = IMerlinSwapPool(pool).decLimOrderWithX(order.pt, 0);
         } else {
-            (, legacyAccEarn) = IiZiSwapPool(pool).decLimOrderWithY(order.pt, 0);
+            (, legacyAccEarn) = IMerlinSwapPool(pool).decLimOrderWithY(order.pt, 0);
         }
         uint128 sold;
         uint160 sqrtPrice_96 = LogPowMath.getSqrtPrice(order.pt);
@@ -623,13 +623,13 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
         bool sellXEarnY = order.sellXEarnY;
         if (actualDecrease > 0) {
             if (sellXEarnY) {
-                IiZiSwapPool(pool).decLimOrderWithX(order.pt, actualDecrease);
+                IMerlinSwapPool(pool).decLimOrderWithX(order.pt, actualDecrease);
             } else {
-                IiZiSwapPool(pool).decLimOrderWithY(order.pt, actualDecrease);
+                IMerlinSwapPool(pool).decLimOrderWithY(order.pt, actualDecrease);
             }
         }
         if (actualDecrease > 0 || earn > 0) {
-            IiZiSwapPool(pool).collectLimOrder(recipient, order.pt, actualDecrease, earn, sellXEarnY);
+            IMerlinSwapPool(pool).collectLimOrder(recipient, order.pt, actualDecrease, earn, sellXEarnY);
         }
 
         PoolMeta memory poolMeta = poolMetas[order.poolId];
@@ -670,7 +670,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
         bool sellXEarnY = order.sellXEarnY;
 
         if (earn > 0) {
-            IiZiSwapPool(pool).collectLimOrder(recipient, order.pt, 0, earn, sellXEarnY);
+            IMerlinSwapPool(pool).collectLimOrder(recipient, order.pt, 0, earn, sellXEarnY);
         }
         
         if (noRemain) {
@@ -763,7 +763,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
         if (params.tokenOut < params.tokenIn) {
             // tokenOut is tokenX, tokenIn is tokenY
             // we should call y2XDesireX
-            (amountOut, amountIn) = IiZiSwapPool(poolAddr).swapY2XDesireX(
+            (amountOut, amountIn) = IMerlinSwapPool(poolAddr).swapY2XDesireX(
                 recipient, params.amount, 799999,
                 abi.encode(SwapCallbackData({
                     tokenX: params.tokenOut, 
@@ -776,7 +776,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
         } else {
             // tokenOut is tokenY
             // tokenIn is tokenX
-            (amountIn, amountOut) = IiZiSwapPool(poolAddr).swapX2YDesireY(
+            (amountIn, amountOut) = IMerlinSwapPool(poolAddr).swapX2YDesireY(
                 recipient, params.amount, -799999,
                 abi.encode(SwapCallbackData({
                     tokenX: params.tokenIn, 
@@ -800,7 +800,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
         uint256 amountOut;
         if (params.tokenIn < params.tokenOut) {
             // swapX2Y
-            (amountIn, amountOut) = IiZiSwapPool(poolAddr).swapX2Y(
+            (amountIn, amountOut) = IMerlinSwapPool(poolAddr).swapX2Y(
                 recipient, params.amount, -799999,
                 abi.encode(SwapCallbackData({
                     tokenX: params.tokenIn, 
@@ -812,7 +812,7 @@ contract LimitOrderWithSwapManager is Switch, Base, IiZiSwapAddLimOrderCallback,
             require (amountOut >= params.minAcquiredOrMaxPayed, "swapX2Y acquire too little");
         } else {
             // swapY2X
-            (amountOut, amountIn) = IiZiSwapPool(poolAddr).swapY2X(
+            (amountOut, amountIn) = IMerlinSwapPool(poolAddr).swapY2X(
                 recipient, params.amount, 799999,
                 abi.encode(SwapCallbackData({
                     tokenX: params.tokenOut, 

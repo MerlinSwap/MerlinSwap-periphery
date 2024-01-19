@@ -14,7 +14,7 @@ const v = process.argv
 const weth = v[2];
 async function main() {
 
-    const factory = deployed[net].iZiSwapFactory;
+    const factory = deployed[net].MerlinSwapFactory;
 
     // deploy swap
     const Swap = await ethers.getContractFactory("Swap");
