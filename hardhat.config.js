@@ -215,6 +215,10 @@ module.exports = {
       url: 'https://testnet-rpc.zkfair.io/',
       accounts: [sk],
     },
+    merlinTest: {
+      url: 'https://testnet-rpc.merlinchain.io',
+      accounts: [sk],
+    },
   },
   etherscan: { 
     customChains:[
