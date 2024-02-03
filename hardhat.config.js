@@ -219,6 +219,11 @@ module.exports = {
       url: 'https://testnet-rpc.merlinchain.io',
       accounts: [sk],
     },
+    merlin: {
+      url: 'https://rpc.merlinchain.io',
+      accounts: [sk],
+      gasPrice: 50000000,
+    },
   },
   etherscan: { 
     customChains:[
