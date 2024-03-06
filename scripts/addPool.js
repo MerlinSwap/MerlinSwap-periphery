@@ -4,7 +4,7 @@ const provider = waffle.provider;
 
 async function main() {
 
-    var token0 = settings.IZI;
+    var token0 = settings.merlin;
     var token1 = settings.USDC;
     var fee = 3000;
 

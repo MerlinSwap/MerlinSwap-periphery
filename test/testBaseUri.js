@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 const BigNumber = require('bignumber.js');
-const { getPoolParts, getIzumiswapFactory } = require("./funcs.js")
+const { getPoolParts, getMERLINswapFactory } = require("./funcs.js")
 
 async function getToken(dx, dy) {
 
@@ -315,8 +315,8 @@ async function checkUserEarn(
 }
 
 async function getLimOrder(poolAddr, pt) {
-    const IzumiswapPool = await ethers.getContractFactory("IzumiswapPool");
-    pool = await IzumiswapPool.attach(poolAddr);
+    const MERLINswapPool = await ethers.getContractFactory("MERLINswapPool");
+    pool = await MERLINswapPool.attach(poolAddr);
     [sellingX, accEarnX, sellingY, accEarnY, earnX, earnY] = await pool.limitOrderData(pt);
     return [
         BigNumber(sellingX._hex),
@@ -328,8 +328,8 @@ async function getLimOrder(poolAddr, pt) {
     ]
 }
 async function getStatusVal(poolAddr, pt) {
-    const IzumiswapPool = await ethers.getContractFactory("IzumiswapPool");
-    pool = await IzumiswapPool.attach(poolAddr);
+    const MERLINswapPool = await ethers.getContractFactory("MERLINswapPool");
+    pool = await MERLINswapPool.attach(poolAddr);
     return await pool.statusVal(pt / 50);
 }
 async function checkStatusVal(eVal, poolAddr, pt) {
@@ -465,7 +465,7 @@ async function tokenURI(nflm, tokenId) {
 describe("swap", function () {
     var signer, miner1, miner2, miner3, miner4, trader1, trader2, receiver1, receiver2;
     var poolPart, poolPartDesire;
-    var izumiswapFactory;
+    var MERLINswapFactory;
     var weth9;
     var nflm;
     var swap;
@@ -480,13 +480,13 @@ describe("swap", function () {
     beforeEach(async function() {
         [signer, miner1, miner2, miner3, miner4, trader1, receiver1, receiver2, trader2] = await ethers.getSigners();
         const {swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule} = await getPoolParts();
-        izumiswapFactory = await getIzumiswapFactory(signer.address, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer);
-        console.log("get izumiswapFactory");
+        MERLINswapFactory = await getMERLINswapFactory(signer.address, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer);
+        console.log("get MERLINswapFactory");
         weth9 = await getWETH9(signer);
         console.log("get weth9");
-        nflm = await getNFTLiquidityManager(izumiswapFactory, weth9);
+        nflm = await getNFTLiquidityManager(MERLINswapFactory, weth9);
         console.log("get nflm");
-        swap = await getSwap(izumiswapFactory, weth9);
+        swap = await getSwap(MERLINswapFactory, weth9);
 
         [tokenX, tokenY] = await getToken(18, 18);
         txAddr = tokenX.address.toLowerCase();
@@ -558,7 +558,7 @@ describe("swap", function () {
 
 
 
-        const okOwner_2 = await setBaseURI(nflm, signer, 'www.izumi.com/');
+        const okOwner_2 = await setBaseURI(nflm, signer, 'www.MERLIN.com/');
         expect(okOwner_2).to.equal(true);
 
         console.log(await tokenURI(nflm, '0'));

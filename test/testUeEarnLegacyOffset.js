@@ -5,7 +5,7 @@ const BigNumber = require('bignumber.js');
 const { 
     getPoolParts, 
     getPool,
-    getIzumiswapFactory, 
+    getMERLINswapFactory, 
     stringMinus,
     ceil,
     newLimOrderWithX,
@@ -172,7 +172,7 @@ async function swapX2Y(swap, trader, amount, tokenX, tokenY, lowPt) {
 }
 describe("test ue earn legacyearn", function () {
     var signer, A, B, C, D, E, F, G, H;
-    var izumiswapFactory;
+    var MERLINswapFactory;
     var pool;
     var weth9;
     var nflm;
@@ -186,11 +186,11 @@ describe("test ue earn legacyearn", function () {
         [signer, A, B, C, D, E, F, G, H] = await ethers.getSigners();
 
         const {swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule} = await getPoolParts();
-        izumiswapFactory = await getIzumiswapFactory(signer.address, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer);
+        MERLINswapFactory = await getMERLINswapFactory(signer.address, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer);
         weth9 = await getWETH9(signer);
-        nflm = await getNFTLiquidityManager(izumiswapFactory, weth9);
-        swap = await getSwap(izumiswapFactory, weth9);
-        limorderManager = await getLimorderManager(izumiswapFactory, weth9);
+        nflm = await getNFTLiquidityManager(MERLINswapFactory, weth9);
+        swap = await getSwap(MERLINswapFactory, weth9);
+        limorderManager = await getLimorderManager(MERLINswapFactory, weth9);
 
         [tokenX, tokenY] = await getToken(18, 18);
         txAddr = tokenX.address.toLowerCase();

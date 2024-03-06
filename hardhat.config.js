@@ -8,7 +8,6 @@ const apiKey = secret.apiKey;
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-const izumiRpcUrl = "http://47.241.103.6:9545";
 module.exports = {
   solidity: {
     compilers: [
@@ -37,13 +36,6 @@ module.exports = {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
-    },
-    izumiTest: {
-      url: izumiRpcUrl,
-      accounts: [sk],
-      // gas: 90000000,
-      gas: 5000000,
-      gasPrice: 100000000000,
     },
     bscTest: {
       url: 'https://data-seed-prebsc-2-s1.binance.org:8545/',

@@ -5,7 +5,7 @@ const deployed = require('../deployed.js');
 
 example: 
 
-HARDHAT_NETWORK='izumiTest' node scripts/nftLiquidityManager/deployNFLM.js
+HARDHAT_NETWORK='MERLINTest' node scripts/nftLiquidityManager/deployNFLM.js
 
 */
 

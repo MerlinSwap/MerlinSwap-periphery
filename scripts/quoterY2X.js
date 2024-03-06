@@ -35,7 +35,7 @@ async function main() {
     var quoterABI = getQuoterABI();
     var quoter = new web3.eth.Contract(quoterABI, settings.quoterAddr);
     const tokenX = settings.USDC;
-    const tokenY = settings.IZI;
+    const tokenY = settings.merlin;
     var ret = await quoter.methods.swapX2Y(tokenX, tokenY, 3000, "2000000000000000000", -414450).call();
     console.log(ret.toString());
 }

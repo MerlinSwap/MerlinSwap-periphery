@@ -54,7 +54,7 @@ async function getPool(poolAddr, signer) {
     return pool
 }
 
-async function getIzumiswapFactory(receiverAddr, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer) {
+async function getMERLINswapFactory(receiverAddr, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer) {
     const MerlinSwapJson = getContractJson(__dirname + '/core/MerlinSwapFactory.json');
     
     const MerlinSwapFactory = await ethers.getContractFactory(MerlinSwapJson.abi, MerlinSwapJson.bytecode, signer);
@@ -485,7 +485,7 @@ function getRevertString(originStr) {
 module.exports ={
     getPoolParts,
     getPool,
-    getIzumiswapFactory,
+    getMERLINswapFactory,
     getLimOrder,
     getAcquiredFee,
     getFeeCharge,

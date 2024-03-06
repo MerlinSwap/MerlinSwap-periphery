@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 const BigNumber = require('bignumber.js');
 const { strictEqual } = require("assert");
-const { getPoolParts, getIzumiswapFactory, addLiquidity } = require("./funcs.js")
+const { getPoolParts, getMERLINswapFactory, addLiquidity } = require("./funcs.js")
 
 async function getToken(name, symbol, decimal) {
     const tokenFactory = await ethers.getContractFactory("TestToken")

@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 const BigNumber = require('bignumber.js');
 const { 
     getPoolParts, 
-    getIzumiswapFactory, 
+    getMERLINswapFactory, 
     stringAdd, stringDivCeil, stringMinus, stringMul,stringDiv, 
     newLimOrderWithSwap,
     collectLimOrderWithSwap, 
@@ -262,7 +262,7 @@ function getEarnXFromYAt(sqrtPrice_96, costY) {
 describe("limorder", function () {
     var signer, seller1, seller2, seller3, trader, trader2;
     var poolPart, poolPartDesire;
-    var izumiswapFactory;
+    var MERLINswapFactory;
     var viewLimorder;
     var weth9;
     var nflm;
@@ -275,12 +275,12 @@ describe("limorder", function () {
         [signer, seller1, seller2, seller3, trader, trader2, recipient1, recipient2, receiver] = await ethers.getSigners();
 
         const {swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule} = await getPoolParts();
-        izumiswapFactory = await getIzumiswapFactory(receiver.address, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer);
+        MERLINswapFactory = await getMERLINswapFactory(receiver.address, swapX2YModule, swapY2XModule, liquidityModule, limitOrderModule, flashModule, signer);
         weth9 = await getWETH9(signer);
-        nflm = await getNFTLiquidityManager(izumiswapFactory, weth9);
-        swap = await getSwap(izumiswapFactory, weth9);
-        limorderWithSwapManager = await getLimorderWithSwapManager(izumiswapFactory, weth9)
-        viewLimorder = await getViewLimorder(izumiswapFactory);
+        nflm = await getNFTLiquidityManager(MERLINswapFactory, weth9);
+        swap = await getSwap(MERLINswapFactory, weth9);
+        limorderWithSwapManager = await getLimorderWithSwapManager(MERLINswapFactory, weth9)
+        viewLimorder = await getViewLimorder(MERLINswapFactory);
 
         const LogPowMathTest = await ethers.getContractFactory('TestLogPowMath');
         logPowMath = await LogPowMathTest.deploy();

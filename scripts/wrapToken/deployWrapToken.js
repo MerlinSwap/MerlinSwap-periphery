@@ -5,7 +5,7 @@ const deployed = require('../deployed.js');
 
 example: 
 
-HARDHAT_NETWORK='izumiTest' node scripts/wrapToken/deployWrapToken.js tokenAddr name symbol
+HARDHAT_NETWORK='MERLINTest' node scripts/wrapToken/deployWrapToken.js tokenAddr name symbol
 
 */
 

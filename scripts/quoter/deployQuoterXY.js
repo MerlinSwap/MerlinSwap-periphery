@@ -5,7 +5,7 @@ const deployed = require('../deployed.js');
 
 example: 
 
-HARDHAT_NETWORK='izumiTest' node scripts/swap/deploySwap.js
+HARDHAT_NETWORK='MERLINTest' node scripts/swap/deploySwap.js
 
 */
 

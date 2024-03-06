@@ -1,14 +1,14 @@
 {
-  "name": "@izumifinance/MerlinSwap_periphery",
+  "name": "@MERLINfinance/MerlinSwap_periphery",
   "version": "1.0.1",
   "keywords": [
-    "iZUMi",
+    "MERLIN",
     "MerlinSwap",
     "periphery"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/izumiFinance/MerlinSwap-core"
+    "url": "https://github.com/MERLINFinance/MerlinSwap-core"
   },
   "files": [
     "contracts/*.sol",

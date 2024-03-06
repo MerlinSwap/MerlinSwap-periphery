@@ -5,8 +5,8 @@ const contracts = require("./deployed.js");
 
 
 // example
-// HARDHAT_NETWORK='izumiTest' \
-//     node getPool.js iZi WETH9 3000
+// HARDHAT_NETWORK='MERLINTest' \
+//     node getPool.js merlin WETH9 3000
 const v = process.argv
 const net = process.env.HARDHAT_NETWORK
 
